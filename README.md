@@ -22,7 +22,7 @@ To run the Docker image, use the following command:
 docker run -d -p 80:80 -p 3500:3500 --name pos-system-app pos-system-app:latest
 ```
 
-Navigate to [http://localhost](http://publicip) and use `admin` as **username** & **password** to see the dashboard.
+Navigate to `http://publicip` and use `admin` as **username** & **password** to see the dashboard.
 
 ## Some screenshots
 
