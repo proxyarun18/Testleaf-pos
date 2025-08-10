@@ -22,6 +22,17 @@ stages:
         steps:
           - checkout: self
 
+          # Enable BuildKit permanently on VM
+          - task: SSH@0
+            displayName: Enable BuildKit on VM
+            inputs:
+              sshEndpoint: $(vmServiceConnection)
+              runOptions: inline
+              inline: |
+                echo "Enabling Docker BuildKit permanently..."
+                echo '{"features":{"buildkit":true}}' | sudo tee /etc/docker/daemon.json
+                sudo systemctl restart docker
+
           # Prepare folder on VM
           - task: SSH@0
             displayName: Prepare app folder on VM
@@ -48,10 +59,12 @@ stages:
               runOptions: inline
               inline: |
                 cd ~/app
-                echo "Building Docker image..."
-                docker build -t $(imageName):$(imageTag) .
                 echo "Stopping old container (if exists)..."
                 docker rm -f myapp-container || true
+                echo "Removing dangling images..."
+                docker image prune -f
+                echo "Building Docker image..."
+                docker build -t $(imageName):$(imageTag) .
                 echo "Starting new container..."
                 docker run -d --name myapp-container -p $(appPort):$(appPort) $(imageName):$(imageTag)
                 echo "Checking app health..."
